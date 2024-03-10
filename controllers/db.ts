@@ -33,5 +33,5 @@ export const dbBackupController = () => {
         console.log(`Database dumped successfully to ${dumpFileName}`);
         // send to r2
 
-
-  })}
+  }
+    )}

@@ -1,15 +1,11 @@
 import { Elysia } from "elysia";
 import dotenv from 'dotenv';
 import { dbBackupController } from "./controllers/db";
-// import { dirBackupController } from "./controllers/directory";
+import { dirBackupController } from "./controllers/directory";
 import { cron } from '@elysiajs/cron'
 dotenv.config();
 
 const app = new Elysia();
-
-// app.use(dbBackupController as any);
-// app.use(dirBackupController as any);
-
 
 app.use(
   cron({
@@ -17,8 +13,12 @@ app.use(
      pattern: String(process.env.CRON_FREQUENCY),
      run (){
        if (process.env.BACKUP_TYPE?.toLowerCase() === 'database'){
-         console.log('cronnnn')
+         console.log('cron')
          dbBackupController()
+       }
+       if (process.env.BACKUP_TYPE?.toLowerCase() === 'directory'){
+         console.log('cron')
+         dirBackupController()
        }
 
      }
