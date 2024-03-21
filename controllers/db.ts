@@ -19,7 +19,7 @@ export const dbBackupController = () => {
         }
 
 
-    exec(dumpCommand, (error, stdout, stderr) => {
+    exec(dumpCommand, (error: { message: any; }, stdout: any, stderr: any) => {
       console.log('dumping')
         if (error) {
             console.error(`Error dumping database: ${error.message}`);

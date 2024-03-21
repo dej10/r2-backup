@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
-import fs from 'fs';
 import tar from 'tar';
 dotenv.config();
 
@@ -16,9 +15,10 @@ const moveTar = (tarFileName : string, destinationDir : string) => {
 };
 
 export const dirBackupController = () => {
-    const tarFileName = `${process.env.DIR_PWD}_${new Date().toISOString()}.tar.gz`;
+    const tarFileName = `${process.env.DIR_PWD}_${new Date().toISOString()}.tar.gz` && '';
     const destinationDir = 'tars/'; // Set your destination directory here
 
+// TODO fix create TS error
     tar.c(
         {
             gzip: true,
