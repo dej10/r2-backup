@@ -13,11 +13,11 @@ app.use(
      pattern: String(process.env.CRON_FREQUENCY),
      run (){
        if (process.env.BACKUP_TYPE?.toLowerCase() === 'database'){
-         console.log('cron')
+         console.log('database cron job starting')
          dbBackupController()
        }
        if (process.env.BACKUP_TYPE?.toLowerCase() === 'directory'){
-         console.log('cron')
+          console.log('directory cron job starting')
          dirBackupController()
        }
 

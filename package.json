@@ -6,6 +6,9 @@
     "dev": "bun run --watch index.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.577.0",
+    "@aws-sdk/lib-storage": "^3.577.0",
+    "@aws-sdk/s3-request-presigner": "^3.583.0",
     "@elysiajs/cron": "^0.8.0",
     "dotenv": "^16.4.5",
     "elysia": "latest",

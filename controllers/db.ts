@@ -1,37 +1,48 @@
 import dotenv from 'dotenv';
-import Elysia from "elysia";
-const { exec } = require('child_process');
+import { exec } from 'child_process';
+import { uploadFile } from './r2';
+
+
+import tar from 'tar';
 import fs from 'fs';
-dotenv.config()
+dotenv.config();
 
+export const dbBackupController = async () => {
+  const dbName = process.env.DATABASE_NAME;
+  const dumpDirectory = 'dumps';
+  const dumpFileName = `${dumpDirectory}/${dbName}_${new Date().toISOString()}.sql`;
+  const dumpCommand = `mysqldump -u${process.env.DATABASE_USER} -p${process.env.DATABASE_PASSWORD} ${dbName} > ${dumpFileName}`;
 
-
-export const dbBackupController = () => {
-    const dbName = process.env.DATABASE_NAME;
-    const dumpDirectory = 'dumps';
-    const dumpFileName = `${dumpDirectory}/${dbName}_${new Date().toISOString()}.sql`;
-
-   const dumpCommand = `mysqldump -u${process.env.DATABASE_USER} -p${process.env.DATABASE_PASSWORD} ${dbName} > ${dumpFileName} `;
-
-
-    if (!fs.existsSync(dumpDirectory)) {
-            fs.mkdirSync(dumpDirectory);
-        }
-
-
-    exec(dumpCommand, (error: { message: any; }, stdout: any, stderr: any) => {
-      console.log('dumping')
-        if (error) {
-            console.error(`Error dumping database: ${error.message}`);
-            return;
-        }
-        // TODO fix mysqldump stderr: mysqldump: [Warning] Using a password on the command line interface can be insecure.
-        if (stderr) {
-            console.error(`mysqldump stderr: ${stderr}`);
-            return;
-        }
-        console.log(`Database dumped successfully to ${dumpFileName}`);
-        // send to r2
-
+  if (!fs.existsSync(dumpDirectory)) {
+    fs.mkdirSync(dumpDirectory);
   }
-    )}
+
+  exec(dumpCommand, async (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error dumping database: ${error.message}`);
+      return;
+    }
+
+    if (stderr) {
+      console.error(`mysqldump stderr: ${stderr}`);
+    }
+
+    console.log(`Database dumped successfully to ${dumpFileName}`);
+
+      const tarFileName = `${dumpFileName}.tar.gz`;
+
+      await tar.c(
+        {
+          gzip: true,
+          file: tarFileName,
+        },
+        [dumpFileName]
+      );
+
+      console.log(`Database dump tarball created at ${tarFileName}`);
+
+
+
+      await uploadFile('db-backups', tarFileName, tarFileName);
+});
+};
