@@ -1,6 +1,3 @@
-// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-
-
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3 } from '@aws-sdk/client-s3';
 import fs from 'fs';
@@ -11,16 +8,9 @@ export const uploadR2 = async (bucketName: string, fileName: string, filePath: s
       accessKeyId: process.env.R2_ACCESS_KEY_ID!,
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!
     },
-
     endpoint: process.env.R2_ENDPOINT!,
     region: 'auto',
-
-    // The key s3ForcePathStyle is renamed to forcePathStyle.
     forcePathStyle: false,
-
-    // The key signatureVersion is no longer supported in v3, and can be removed.
-    // @deprecated SDK v3 only supports signature v4.
-    // signatureVersion: 'v4'
   });
 
   const fileStream = fs.createReadStream(filePath);

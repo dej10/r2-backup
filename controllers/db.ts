@@ -10,7 +10,6 @@ export const dbBackupController = async () => {
   const dbName = process.env.DATABASE_NAME!;
   const bucketName = process.env.R2_BUCKET_NAME!;
   const dumpDirectory = 'dumps';
-  // const dumpFileName = `${dumpDirectory}/${dbName}_${new Date().toISOString()}.sql`;
 
   const dumpFileName = `${dumpDirectory}/${dbName}_${new Date()
     .toISOString()
@@ -24,7 +23,7 @@ export const dbBackupController = async () => {
   exec(dumpCommand, async (error, stdout, stderr) => {
     if (error) {
       console.error(`Error dumping database: ${error.message}`);
-      return;
+      return false;
     }
 
     if (stderr) {
