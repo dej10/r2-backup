@@ -34,6 +34,7 @@ export const dbBackupController = async () => {
 
     const tarFileName = `${dumpFileName}.tar.gz`;
 
+    console.log(`Creating tarball of database dump at ${tarFileName}`);
     await tar.c(
       {
         gzip: true,

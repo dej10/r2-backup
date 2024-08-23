@@ -23,11 +23,18 @@ export const uploadR2 = async (bucketName: string, fileName: string, filePath: s
   };
 
   try {
+    console.log('Uploading file to R2...');
     const data = await new Upload({
       client: r2,
       params
     }).done();
     console.log(`File uploaded successfully. R2 URL: ${data.Location}`);
+
+    // delete file after uploading
+    fs.unlinkSync(filePath);
+
+
+
   } catch (error) {
     console.log(`Error uploading: ${error}`);
   } finally {
