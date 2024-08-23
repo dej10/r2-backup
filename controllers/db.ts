@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
-import { uploadFile, uploadR2 } from './r2';
+import {  uploadR2 } from './r2';
 
 import tar from 'tar';
 import fs from 'fs';
@@ -45,7 +45,6 @@ export const dbBackupController = async () => {
 
     console.log(`Database dump tarball created at ${tarFileName}`);
 
-    // await uploadFile('db-backups', tarFileName, tarFileName);
     await uploadR2(bucketName, tarFileName, tarFileName);
   });
 };
