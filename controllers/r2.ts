@@ -34,9 +34,9 @@ export const uploadR2 = async (bucketName: string, fileName: string, filePath: s
     // delete file after uploading to R2 
      unlink(filePath, (err) => {
       if (err) {
-        console.error('Error deleting file:', err);
+        console.error(`Error deleting  ${filePath}:', err`);
       } else {
-        console.log('File deleted successfully');
+        console.log(`Tar ${filePath} deleted successfully`);
       }
     });
 

@@ -46,9 +46,9 @@ export const dbBackupController = async () => {
 
      unlink(dumpFileName, (err) => {
       if (err) {
-        console.error('Error deleting file:', err);
+        console.error(`Error deleting ${dumpFileName}:`, err);
       } else {
-        console.log('File deleted successfully');
+        console.log(`Dump ${dumpFileName}  deleted successfully`);
       }
     });
 
