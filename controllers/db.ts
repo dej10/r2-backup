@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
-import {  uploadR2 } from './r2';
+import { uploadR2 } from './r2';
 
 import tar from 'tar';
-import fs from 'fs';
+import fs, { unlink } from 'fs';
+
 dotenv.config();
 
 export const dbBackupController = async () => {
@@ -42,6 +43,14 @@ export const dbBackupController = async () => {
       },
       [dumpFileName]
     );
+
+     unlink(dumpFileName, (err) => {
+      if (err) {
+        console.error('Error deleting file:', err);
+      } else {
+        console.log('File deleted successfully');
+      }
+    });
 
     console.log(`Database dump tarball created at ${tarFileName}`);
 
