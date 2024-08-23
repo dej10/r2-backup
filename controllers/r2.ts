@@ -1,36 +1,46 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import fs from 'fs';
-import path from 'path';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
-export const uploadFile = async (bucketName: string, key: string, filePath: string) => {
-  const client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${process.env.ACCOUNT_ID}.r2.cloudflarestorage.com`,
+
+import { Upload } from '@aws-sdk/lib-storage';
+import { S3 } from '@aws-sdk/client-s3';
+import fs from 'fs';
+
+export const uploadR2 = async (bucketName: string, fileName: string, filePath: string) => {
+  const r2 = new S3({
     credentials: {
-      accessKeyId: process.env.ACCESS_KEY_ID!,
-      secretAccessKey: process.env.SECRET_ACCESS_KEY!,
-    }
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!
+    },
+
+    endpoint: process.env.R2_ENDPOINT!,
+    region: 'auto',
+
+    // The key s3ForcePathStyle is renamed to forcePathStyle.
+    forcePathStyle: false,
+
+    // The key signatureVersion is no longer supported in v3, and can be removed.
+    // @deprecated SDK v3 only supports signature v4.
+    // signatureVersion: 'v4'
   });
 
   const fileStream = fs.createReadStream(filePath);
 
-  const input = {
+  const params = {
     Bucket: bucketName,
-    Key: key,
-    ContentType: 'application/x-gzip',
+    Key: fileName,
     Body: fileStream,
-  }
+    ContentType: 'application/x-gzip'
+  };
 
   try {
-    console.log('Sending upload command');
-    const result = await client.send(new PutObjectCommand(input));
-    console.log('File uploaded successfully', result);
+    const data = await new Upload({
+      client: r2,
+      params
+    }).done();
+    console.log(`File uploaded successfully. R2 URL: ${data.Location}`);
   } catch (error) {
-    console.error('Error uploading file:', error);
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-    }
+    console.log(`Error uploading: ${error}`);
   } finally {
-    fileStream.destroy(); // Close the file stream
+    fileStream.destroy();
   }
 };

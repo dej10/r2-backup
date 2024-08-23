@@ -1,16 +1,20 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
-import { uploadFile } from './r2';
-
+import {  uploadR2 } from './r2';
 
 import tar from 'tar';
 import fs from 'fs';
 dotenv.config();
 
 export const dbBackupController = async () => {
-  const dbName = process.env.DATABASE_NAME;
+  const dbName = process.env.DATABASE_NAME!;
+  const bucketName = process.env.R2_BUCKET_NAME!;
   const dumpDirectory = 'dumps';
-  const dumpFileName = `${dumpDirectory}/${dbName}_${new Date().toISOString()}.sql`;
+  // const dumpFileName = `${dumpDirectory}/${dbName}_${new Date().toISOString()}.sql`;
+
+  const dumpFileName = `${dumpDirectory}/${dbName}_${new Date()
+    .toISOString()
+    .replace(/:/g, '-')}.sql`; // windows cannot process the colon (:) character in the shell do replacing that with hyphen (-)
   const dumpCommand = `mysqldump -u${process.env.DATABASE_USER} -p${process.env.DATABASE_PASSWORD} ${dbName} > ${dumpFileName}`;
 
   if (!fs.existsSync(dumpDirectory)) {
@@ -29,20 +33,18 @@ export const dbBackupController = async () => {
 
     console.log(`Database dumped successfully to ${dumpFileName}`);
 
-      const tarFileName = `${dumpFileName}.tar.gz`;
+    const tarFileName = `${dumpFileName}.tar.gz`;
 
-      await tar.c(
-        {
-          gzip: true,
-          file: tarFileName,
-        },
-        [dumpFileName]
-      );
+    await tar.c(
+      {
+        gzip: true,
+        file: tarFileName
+      },
+      [dumpFileName]
+    );
 
-      console.log(`Database dump tarball created at ${tarFileName}`);
+    console.log(`Database dump tarball created at ${tarFileName}`);
 
-
-
-      await uploadFile('db-backups', tarFileName, tarFileName);
-});
+    await uploadR2(bucketName, tarFileName, tarFileName);
+  });
 };

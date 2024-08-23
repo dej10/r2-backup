@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
 import tar from 'tar';
-import { uploadFile } from './r2';
+import { uploadR2 } from './r2';
 dotenv.config();
 
 const moveTar = (tarFileName : string, destinationDir : string) => {
@@ -34,6 +34,6 @@ export const dirBackupController =  async () => {
     .catch((err : any) => {
         console.error(`Error tarring folder ${process.env.DIR_PWD}: ${err}`);
     });
-        await uploadFile('db-backups', tarFileName, tarFileName);
+        await uploadR2('db-backups', tarFileName, tarFileName);
 
 };
