@@ -1,6 +1,7 @@
 import { Upload } from '@aws-sdk/lib-storage';
 import { S3 } from '@aws-sdk/client-s3';
-import fs from 'fs';
+import fs, { unlink } from 'fs';
+
 
 export const uploadR2 = async (bucketName: string, fileName: string, filePath: string) => {
   const r2 = new S3({
@@ -30,9 +31,14 @@ export const uploadR2 = async (bucketName: string, fileName: string, filePath: s
     }).done();
     console.log(`File uploaded successfully. R2 URL: ${data.Location}`);
 
-    // delete file after uploading
-    fs.unlinkSync(filePath);
-
+    // delete file after uploading to R2 
+     unlink(filePath, (err) => {
+      if (err) {
+        console.error('Error deleting file:', err);
+      } else {
+        console.log('File deleted successfully');
+      }
+    });
 
 
   } catch (error) {
