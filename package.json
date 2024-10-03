@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/tar": "^6.1.11",
+    "aws-sdk-js-codemod": "^2.3.2",
     "bun-types": "latest"
   },
   "module": "src/index.js"
