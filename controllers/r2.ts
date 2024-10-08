@@ -48,8 +48,31 @@ export const uploadR2 = async (bucketName: string, fileName: string, filePath: s
 export const deleteOldBackups = async () => {
   console.log('Checking for outdated backups...');
   const bucketName = process.env.R2_BUCKET_NAME!;
-  const twoMonthsAgo = new Date();
-  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+  const deleteFrequency = process.env.PURGE_BACKUPS_FREQUENCY!;
+  const extractedFrequency = extractPartsFromString(deleteFrequency);
+
+  if (!extractedFrequency) {
+    console.error('Invalid PURGE_BACKUPS_FREQUENCY format. Expected e.g., 2M, 12D, 1W');
+    return;
+  }
+
+  const { digits, timePeriod } = extractedFrequency;
+
+  const period = new Date();
+  switch (timePeriod) {
+    case 'M':
+      period.setMonth(period.getMonth() - digits);
+      break;
+    case 'W':
+      period.setDate(period.getDate() - digits * 7);
+      break;
+    case 'D':
+      period.setDate(period.getDate() - digits);
+      break;
+    default:
+      console.error('Unsupported time period');
+      return;
+  }
 
   try {
     const listParams = {
@@ -61,7 +84,7 @@ export const deleteOldBackups = async () => {
 
     if (data.Contents) {
       for (const object of data.Contents) {
-        if (object.LastModified && object.LastModified < twoMonthsAgo) {
+        if (object.LastModified && object.LastModified < period) {
           const deleteParams = {
             Bucket: bucketName,
             Key: object.Key
@@ -76,5 +99,19 @@ export const deleteOldBackups = async () => {
     console.log('Cleanup of old backups completed successfully.');
   } catch (error) {
     console.error('Error during cleanup of old backups:', error);
+  }
+};
+
+const extractPartsFromString = (input: string) => {
+  const regex = /^([1-9]\d?)([MDW])$/i;
+  const match = input.match(regex);
+
+  if (match) {
+    return {
+      digits: parseInt(match[1], 10),
+      timePeriod: match[2].toUpperCase()
+    };
+  } else {
+    return null; // Invalid input
   }
 };
