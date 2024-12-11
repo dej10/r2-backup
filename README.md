@@ -18,6 +18,8 @@ bun run dev
 cd /var/www/scripts/
 git clone https://github.com/dej10/r2-backup.git
 cd r2-backup 
+bun install
+cp .env.example .env 
 pm2 start --interpreter ~/.bun/bin/bun index.ts --name db-backup-worker
 ```
 
