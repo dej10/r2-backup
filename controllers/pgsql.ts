@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
-import { uploadR2 } from './r2';
+import { deleteOldBackups, uploadR2 } from './r2';
 
 import tar from 'tar';
 import fs, { unlink } from 'fs';
@@ -13,13 +13,16 @@ export const pgsqlBackupController = async () => {
   const dbPassword = process.env.DATABASE_PASSWORD!;
   const dbHost = process.env.DATABASE_HOST || 'localhost';
   const dbPort = process.env.DATABASE_PORT || '5432';
+  const containerName = process.env.DOCKER_CONTAINER_NAME;
   const bucketName = process.env.R2_BUCKET_NAME!;
   const dumpDirectory = 'dumps';
 
   const dumpFileName = `${dumpDirectory}/${dbName}_${new Date()
     .toISOString()
     .replace(/:/g, '-')}.sql`;
-  const dumpCommand = `PGPASSWORD=${dbPassword} pg_dump -h ${dbHost} -p ${dbPort} -U ${dbUser} ${dbName} > ${dumpFileName}`;
+  const dumpCommand = containerName
+    ? `docker exec -e PGPASSWORD=${dbPassword} ${containerName} pg_dump -U ${dbUser} ${dbName} > ${dumpFileName}`
+    : `PGPASSWORD=${dbPassword} pg_dump -h ${dbHost} -p ${dbPort} -U ${dbUser} ${dbName} > ${dumpFileName}`;
 
   if (!fs.existsSync(dumpDirectory)) {
     fs.mkdirSync(dumpDirectory);
@@ -59,5 +62,6 @@ export const pgsqlBackupController = async () => {
     console.log(`PostgreSQL dump tarball created at ${tarFileName}`);
 
     await uploadR2(bucketName, tarFileName, tarFileName);
+    await deleteOldBackups();
   });
 };
