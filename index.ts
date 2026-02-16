@@ -2,6 +2,7 @@ import { Elysia } from 'elysia';
 import dotenv from 'dotenv';
 import { dbBackupController } from './controllers/db';
 import { dirBackupController } from './controllers/directory';
+import { pgsqlBackupController } from './controllers/pgsql';
 import { cron } from '@elysiajs/cron';
 dotenv.config();
 
@@ -19,6 +20,10 @@ app.use(
       if (process.env.BACKUP_TYPE?.toLowerCase() === 'directory') {
         console.log('directory cron job starting');
         dirBackupController();
+      }
+      if (process.env.BACKUP_TYPE?.toLowerCase() === 'pgsql') {
+        console.log('pgsql cron job starting');
+        pgsqlBackupController();
       }
     }
   })
